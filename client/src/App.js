@@ -39,12 +39,14 @@ function App() {
 
   useEffect(() => {
     socket.current = io.connect("/");
-    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
-      setStream(stream);
-      if (userVideo.current) {
-        userVideo.current.srcObject = stream;
-      }
-    });
+    navigator.mediaDevices
+      .getUserMedia({ video: true, audio: true })
+      .then((stream) => {
+        setStream(stream);
+        if (userVideo.current) {
+          userVideo.current.srcObject = stream;
+        }
+      });
 
     socket.current.on("yourID", (id) => {
       setYourID(id);
@@ -96,7 +98,11 @@ function App() {
     });
 
     peer.on("signal", (data) => {
-      socket.current.emit("callUser", { userToCall: id, signalData: data, from: yourID });
+      socket.current.emit("callUser", {
+        userToCall: id,
+        signalData: data,
+        from: yourID,
+      });
     });
 
     peer.on("stream", (stream) => {
@@ -115,7 +121,7 @@ function App() {
   }
 
   function acceptCall() {
-    setReceivingCall(false);
+    setReceivingCall(true);
     setCallAccepted(true);
     const peer = new Peer({
       initiator: false,
@@ -162,31 +168,37 @@ function App() {
     );
   }
   return (
-    <Container>
-      <Row>
-        {UserVideo}
-        {callAccepted && (
-          <>
-            <Video playsInline ref={partnerVideo} autoPlay />
-            <button onClick={endCall}>End Call</button>
-          </>
-        )}
-      </Row>
-      <Row>
-        {Object.keys(users).map((key) => {
-          if (key === yourID) {
-            return null;
-          }
-          return (
-            <button key={key} onClick={() => callPeer(key)}>
-              Call {key}
-            </button>
-          );
-        })}
-      </Row>
-      <Row>{}</Row>
-      <Row>{receivingCall && !callAccepted && incomingCall && acceptCall()}</Row>
-    </Container>
+    <React.Fragment>
+      <Container>
+        <Row>
+          {UserVideo}
+          {callAccepted && (
+            <>
+              <Video playsInline ref={partnerVideo} autoPlay />
+              <button onClick={endCall}>End Call</button>
+            </>
+          )}
+        </Row>
+        <Row>
+          {Object.keys(users).map((key) => {
+            if (key === yourID) {
+              return null;
+            }
+            return (
+              <button key={key} onClick={() => callPeer(key)}>
+                Call {key}
+              </button>
+            );
+          })}
+        </Row>
+        <Row>{}</Row>
+        <Row>
+          {receivingCall && !callAccepted && (
+            <button onClick={acceptCall}>Accept Call</button>
+          )}
+        </Row>
+      </Container>
+    </React.Fragment>
   );
 }
 

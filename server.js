@@ -13,18 +13,23 @@ io.on("connection", (socket) => {
     users[socket.id] = socket.id;
   }
 
+  console.log(socket.id);
+
   socket.emit("yourID", socket.id);
 
   io.sockets.emit("allUsers", users);
 
   socket.on("disconnect", function () {
-    console.log("DISCONNESSO!!! ");
+    console.log("DISCONNECTED!!! ");
     delete users[socket.id];
     io.sockets.emit("allUsers", users);
   });
 
   socket.on("callUser", (data) => {
-    io.to(data.userToCall).emit("hey", { signal: data.signalData, from: data.from });
+    io.to(data.userToCall).emit("hey", {
+      signal: data.signalData,
+      from: data.from,
+    });
   });
 
   socket.on("acceptCall", (data) => {
